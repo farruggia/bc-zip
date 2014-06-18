@@ -1,0 +1,5 @@
+*.swp
+CMakeLists.txt.user
+build/
+in_dev/
+bc_zip.sublime-workspace
