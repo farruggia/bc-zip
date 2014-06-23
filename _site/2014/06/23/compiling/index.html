@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Compiling &middot; bc-zip
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      <h1>bc-zip</h1>
+      <p class="lead">Bicriteria Compressor</p>
+    </div>
+
+
+    <!--  -->
+    
+    
+    
+    
+    
+    
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item">
+        <a href="/">About</a>
+      </li>
+      <li class="sidebar-nav-item">
+        <a href="/2014/06/23/source-code/">Source Code</a>
+      </li>
+      <li class="sidebar-nav-item">
+        Manual
+        <ul>
+          <li class="sidebar-nav-item active">
+            <a href="/2014/06/23/compiling/">Compiling</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="/2014/06/23/usage/">Usage</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="/2014/06/23/target/">Target files</a>
+          </li>
+        </ul>
+      </li>
+      <li class="sidebar-nav-item">
+        <a href="/2014/06/23/biblio/">Bibliography</a>
+      </li>
+      <li class="sidebar-nav-item">
+        <a href="/2014/06/23/contacts/">Contact us</a>
+      </li>
+      <li class="sidebar-nav-item">
+        <a target="_blank" href="http://acube.di.unipi.it/bc-zip/">bc-zip @ A³</a>
+      </li>
+    </ul>
+
+    <p>&copy; 2014. All rights reserved.</p>
+  </div>
+</div>
+
+
+    <div class="content container">
+      <h1 id="compilation">Compilation</h1>
+
+<p>bc-zip requires the following components:</p>
+
+<ul>
+  <li><code>cmake</code></li>
+  <li>A <code>C++11</code>-enabled compiler (<code>g++</code> 4.7+, <code>clang</code> 3.2+, <code>icc</code> 11+)</li>
+  <li>Boost (uBLAS, program_options)</li>
+  <li>A POSIX environment</li>
+</ul>
+
+<p>The project is compiled like any standard CMake project:</p>
+
+<ul>
+  <li><code>cd</code> into the project’s directory</li>
+  <li><code>mkdir build</code></li>
+  <li><code>cd build</code></li>
+  <li><code>cmake ../</code></li>
+  <li><code>make</code></li>
+</ul>
+
+<p>The binary (<code>bc-zip</code>) will be located in the <code>build</code> directory.</p>
+
+    </div>
+
+  </body>
+</html>

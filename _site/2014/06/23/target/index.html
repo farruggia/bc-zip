@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Target &middot; bc-zip
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      <h1>bc-zip</h1>
+      <p class="lead">Bicriteria Compressor</p>
+    </div>
+
+
+    <!--  -->
+    
+    
+    
+    
+    
+    
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item">
+        <a href="/">About</a>
+      </li>
+      <li class="sidebar-nav-item">
+        <a href="/2014/06/23/source-code/">Source Code</a>
+      </li>
+      <li class="sidebar-nav-item">
+        Manual
+        <ul>
+          <li class="sidebar-nav-item">
+            <a href="/2014/06/23/compiling/">Compiling</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="/2014/06/23/usage/">Usage</a>
+          </li>
+          <li class="sidebar-nav-item active">
+            <a href="/2014/06/23/target/">Target files</a>
+          </li>
+        </ul>
+      </li>
+      <li class="sidebar-nav-item">
+        <a href="/2014/06/23/biblio/">Bibliography</a>
+      </li>
+      <li class="sidebar-nav-item">
+        <a href="/2014/06/23/contacts/">Contact us</a>
+      </li>
+      <li class="sidebar-nav-item">
+        <a target="_blank" href="http://acube.di.unipi.it/bc-zip/">bc-zip @ A³</a>
+      </li>
+    </ul>
+
+    <p>&copy; 2014. All rights reserved.</p>
+  </div>
+</div>
+
+
+    <div class="content container">
+      <h1 id="target-file">Target file</h1>
+
+<h2 id="what-it-is-and-why-its-needed">What it is and why it’s needed?</h2>
+
+<p>Different machines decompress the same file with different decompression times. So, in order to properly compute the decompression time of a compressed file for a given target machine, <em>bc-zip</em> needs a decompression time model tuned for that target machine (which may be different than the machine used in compression!).</p>
+
+<p>bc-zip does not ship with any decompression time model by default. Instead, bc-zip needs a <em>target file</em> when it is invoked with the “compress” command.</p>
+
+<p>A target file is a small, human-readable file which encodes the decompression time model for a particular machine.</p>
+
+<h2 id="how-do-i-get-it">How do I get it?</h2>
+
+<p>A target file can be obtained in an automatic or semi-automatic fashion through the use of the provided <em>calibrator</em> tool.</p>
+
+<p>A calibrator obtains the target file of the machine in which it is executed.</p>
+
+<p>The calibrator tool is composed of two objects: a shell script <code>calibrator.sh</code> and an executable <code>calibrator</code>, both located in the <code>tool/</code> directory.</p>
+
+<p>The user must invoke the shell script, taking care of having both the shell script and the executable on the same directory.</p>
+
+<p>The tool is invoked as follows:</p>
+
+<pre><code>./calibrator.sh 	&lt;target name&gt; &lt;memory hierarchy descriptor&gt;
+</code></pre>
+
+<p>Where:</p>
+
+<ul>
+  <li><strong>target name</strong>: the name of that particular machine. If X is passed, the outputted target file will be named X.tgt.</li>
+  <li><strong>memory hierarchy descriptor</strong>: A file with a line for each memory level (e.g. L1 and L2 caches, main memory), sorted by capacity, with just two fields for each line separated by some space: level capacity, in kilobytes, and latency, in nanoseconds.</li>
+</ul>
+
+<p>A valid memory hierarchy descriptor could be the following:</p>
+
+<p><code>
+32 				0.41
+256 			1.2
+6144			3.3
+4294967296		80
+</code></p>
+
+<p>Which means that that particular machine has a L1 cache of 32KB with access latency of 0.4ns, a 256kb L2 cache with latency 1.2ns, a L3 cache with latency 3.3 and a main memory of 4GB with latency of 80ns.</p>
+
+<p>This file can also be generated automatically via the get_latencies tool, which can be invoked in the following way:</p>
+
+<pre><code>./get_latencies lmbench_file
+</code></pre>
+
+<p>Where <code>lmbench_file</code> is the output of tool <code>lat_mem_rd</code> in the <a href="http://www.bitmover.com/lmbench/get_lmbench.html">LMBench3 suite</a>.</p>
+
+<p><strong>Example</strong></p>
+
+<pre><code>./calibrator client client_hierarchy.txt
+</code></pre>
+
+<p>Obtains the target file client.tgt of the machine in which it is executed, provided that client_hierarchy.txt properly describes the memory hierarchy of that machine.</p>
+
+    </div>
+
+  </body>
+</html>

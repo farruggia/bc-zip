@@ -1,0 +1,19 @@
+# Dependencies
+markdown:         kramdown
+highlighter:      pygments
+
+# Permalinks
+permalink:        pretty
+
+# Setup
+title:            bc-zip
+tagline:          'Bicriteria Compressor'
+description:      'Bicriteria Compressor'
+url:              http://hyde.getpoole.com
+
+author:
+  name:           'Andrea Farruggia'
+  url:            http://www.di.unipi.it/~farruggi
+
+# Custom vars
+  repo:           https://github.com/farruggia/bc-zip

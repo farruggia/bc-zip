@@ -1,0 +1,51 @@
+<div class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      <h1>{{ site.title }}</h1>
+      <p class="lead">{{ site.description }}</p>
+    </div>
+
+
+    <!-- {% assign source_url = post_url 2014-06-23-source-code %} -->
+    {% capture source_url %}{% post_url 2014-06-23-source-code %}{% endcapture %}
+    {% capture compile_url %}{% post_url 2014-06-23-compiling %}{% endcapture %}
+    {% capture usage_url %}{% post_url 2014-06-23-usage %}{% endcapture %}
+    {% capture target_url %}{% post_url 2014-06-23-target %}{% endcapture %}
+    {% capture bibliography_url %}{% post_url 2014-06-23-biblio %}{% endcapture %}
+    {% capture contact_url %}{% post_url 2014-06-23-contacts %}{% endcapture %}
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item{% if page.title == "Home" %} active{% endif %}">
+        <a href="/">About</a>
+      </li>
+      <li class="sidebar-nav-item{% if source_url == page.url %} active{% endif %}">
+        <a href="{{ source_url }}">Source Code</a>
+      </li>
+      <li class="sidebar-nav-item">
+        Manual
+        <ul>
+          <li class="sidebar-nav-item{% if compile_url == page.url %} active{% endif %}">
+            <a href="{{ compile_url }}">Compiling</a>
+          </li>
+          <li class="sidebar-nav-item{% if usage_url == page.url %} active{% endif %}">
+            <a href="{{ usage_url }}">Usage</a>
+          </li>
+          <li class="sidebar-nav-item{% if target_url == page.url %} active{% endif %}">
+            <a href="{{ target_url }}">Target files</a>
+          </li>
+        </ul>
+      </li>
+      <li class="sidebar-nav-item{% if bibliography_url == page.url %} active{% endif %}">
+        <a href="{{ bibliography_url }}">Bibliography</a>
+      </li>
+      <li class="sidebar-nav-item{% if contact_url == page.url %} active{% endif %}">
+        <a href="{{ contact_url }}">Contact us</a>
+      </li>
+      <li class="sidebar-nav-item">
+        <a target="_blank" href="http://acube.di.unipi.it/bc-zip/">bc-zip @ A³</a>
+      </li>
+    </ul>
+
+    <p>&copy; {{ site.time | date: '%Y' }}. All rights reserved.</p>
+  </div>
+</div>
