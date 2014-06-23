@@ -24,7 +24,7 @@ Here, a 1GiB-file has been compressed with bc-zip and various state-of-the-art c
 Moreover, and more importantly, bc-zip can be used to obtain a compressed file such that the *decompression time is below a user-specified time and the compression ratio is maximized*, and the other way round (compression size bounded, decompression speed maximized).  In this way, it is possible to achieve very good compression ratios *and* decompression speeds comparable or better than those achieved by state-of-the-art compressors [Snappy][snappy] and [LZ4][lz4]. Even better, it is possible to specify the decompression speed dictated by your application requirements, and let bc-zip automatically achieve the highest compression ratio with that constraint.
 
 You can get an idea of what the tool has to offer by looking at the following picture, which shows some space/speed trade-offs achievable by using our compressor, compared to [LZ4][lz4]
-![space/speed plot](public/plot_census_3.png)
+![space/speed plot]({{ site.baseurl }}public/plot_census_3.png)
 
 This is achieved through an innovative way of modeling data compression as an optimization problem, along with the use of a decompression time model which accurately estimates the decompression time of a compressed file.
 
@@ -32,4 +32,4 @@ For some experimental results backing those claims or more background about the 
 
 [snappy]: https://code.google.com/p/snappy/ "Snappy"
 [lz4]: https://code.google.com/p/lz4/ "LZ4"
-[biblio]: {% post_url 2014-06-23-biblio %} "Bibliography"
+[biblio]: {{ site.baseurl }}{% post_url 2014-06-23-biblio %} "Bibliography"

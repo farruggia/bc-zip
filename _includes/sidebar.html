@@ -7,16 +7,16 @@
 
 
     <!-- {% assign source_url = post_url 2014-06-23-source-code %} -->
-    {% capture source_url %}{% post_url 2014-06-23-source-code %}{% endcapture %}
-    {% capture compile_url %}{% post_url 2014-06-23-compiling %}{% endcapture %}
-    {% capture usage_url %}{% post_url 2014-06-23-usage %}{% endcapture %}
-    {% capture target_url %}{% post_url 2014-06-23-target %}{% endcapture %}
-    {% capture bibliography_url %}{% post_url 2014-06-23-biblio %}{% endcapture %}
-    {% capture contact_url %}{% post_url 2014-06-23-contacts %}{% endcapture %}
+    {% capture source_url %}{{ site.baseurl }}{% post_url 2014-06-23-source-code %}{% endcapture %}
+    {% capture compile_url %}{{ site.baseurl }}{% post_url 2014-06-23-compiling %}{% endcapture %}
+    {% capture usage_url %}{{ site.baseurl }}{% post_url 2014-06-23-usage %}{% endcapture %}
+    {% capture target_url %}{{ site.baseurl }}{% post_url 2014-06-23-target %}{% endcapture %}
+    {% capture bibliography_url %}{{ site.baseurl }}{% post_url 2014-06-23-biblio %}{% endcapture %}
+    {% capture contact_url %}{{ site.baseurl }}{% post_url 2014-06-23-contacts %}{% endcapture %}
 
     <ul class="sidebar-nav">
       <li class="sidebar-nav-item{% if page.title == "Home" %} active{% endif %}">
-        <a href="/">About</a>
+        <a href="{{ site.baseurl }}">About</a>
       </li>
       <li class="sidebar-nav-item{% if source_url == page.url %} active{% endif %}">
         <a href="{{ source_url }}">Source Code</a>

@@ -9,8 +9,8 @@ permalink:        pretty
 title:            bc-zip
 tagline:          'Bicriteria Compressor'
 description:      'Bicriteria Compressor'
-url:              http://farruggia.github.io/
-baseurl:          bc-zip/
+url:              http://farruggia.github.io
+baseurl:          /bc-zip
 
 author:
   name:           'Andrea Farruggia'
