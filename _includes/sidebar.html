@@ -14,6 +14,8 @@
     {% capture bibliography_url %}{{ site.baseurl }}{% post_url 2014-06-23-biblio %}{% endcapture %}
     {% capture contact_url %}{{ site.baseurl }}{% post_url 2014-06-23-contacts %}{% endcapture %}
 
+    Current page = "{{ page.url }}"
+
     <ul class="sidebar-nav">
       <li class="sidebar-nav-item{% if page.title == "Home" %} active{% endif %}">
         <a href="{{ site.baseurl }}">About</a>
