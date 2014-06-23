@@ -14,33 +14,33 @@
     {% capture bibliography_url %}{{ site.baseurl }}{% post_url 2014-06-23-biblio %}{% endcapture %}
     {% capture contact_url %}{{ site.baseurl }}{% post_url 2014-06-23-contacts %}{% endcapture %}
 
-    Current page = "{{ site.baseurl }}{{page.url }}"
+    {% capture this_url%}{{ site.baseurl }}{{ page.url }}{%endcapture%}
 
     <ul class="sidebar-nav">
       <li class="sidebar-nav-item{% if page.title == "Home" %} active{% endif %}">
         <a href="{{ site.baseurl }}">About</a>
       </li>
-      <li class="sidebar-nav-item{% if source_url == {{ site.baseurl }}page.url %} active{% endif %}">
+      <li class="sidebar-nav-item{% if source_url == this_url %} active{% endif %}">
         <a href="{{ source_url }}">Source Code</a>
       </li>
       <li class="sidebar-nav-item">
         Manual
         <ul>
-          <li class="sidebar-nav-item{% if compile_url == {{ site.baseurl }}page.url %} active{% endif %}">
+          <li class="sidebar-nav-item{% if compile_url == this_url %} active{% endif %}">
             <a href="{{ compile_url }}">Compiling</a>
           </li>
-          <li class="sidebar-nav-item{% if usage_url == {{ site.baseurl }}page.url %} active{% endif %}">
+          <li class="sidebar-nav-item{% if usage_url == this_url %} active{% endif %}">
             <a href="{{ usage_url }}">Usage</a>
           </li>
-          <li class="sidebar-nav-item{% if target_url == {{ site.baseurl }}page.url %} active{% endif %}">
+          <li class="sidebar-nav-item{% if target_url == this_url %} active{% endif %}">
             <a href="{{ target_url }}">Target files</a>
           </li>
         </ul>
       </li>
-      <li class="sidebar-nav-item{% if bibliography_url == {{ site.baseurl }}page.url %} active{% endif %}">
+      <li class="sidebar-nav-item{% if bibliography_url == this_url %} active{% endif %}">
         <a href="{{ bibliography_url }}">Bibliography</a>
       </li>
-      <li class="sidebar-nav-item{% if contact_url == {{ site.baseurl }}page.url %} active{% endif %}">
+      <li class="sidebar-nav-item{% if contact_url == this_url %} active{% endif %}">
         <a href="{{ contact_url }}">Contact us</a>
       </li>
       <li class="sidebar-nav-item">
