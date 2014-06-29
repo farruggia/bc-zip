@@ -13,6 +13,7 @@
     {% capture target_url %}{{ site.baseurl }}{% post_url 2014-06-23-target %}{% endcapture %}
     {% capture bibliography_url %}{{ site.baseurl }}{% post_url 2014-06-23-biblio %}{% endcapture %}
     {% capture contact_url %}{{ site.baseurl }}{% post_url 2014-06-23-contacts %}{% endcapture %}
+    {% capture api_url %}{{ site.baseurl }}{% post_url 2014-06-29-api %}{% endcapture %}
 
     {% capture this_url%}{{ site.baseurl }}{{ page.url }}{%endcapture%}
 
@@ -35,6 +36,10 @@
           <li class="sidebar-nav-item{% if target_url == this_url %} active{% endif %}">
             <a href="{{ target_url }}">Target files</a>
           </li>
+          <li class="sidebar-nav-item{% if api_url == this_url %} active{% endif %}">
+            <a href="{{ api_url }}">API</a>
+          </li>
+
         </ul>
       </li>
       <li class="sidebar-nav-item{% if bibliography_url == this_url %} active{% endif %}">
