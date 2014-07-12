@@ -474,7 +474,7 @@ time_matrix phrase_decode_time(const char *encoder)
 			std::vector<edge_t> edges;
 			edges.push_back(edge_t(1));
 			const id_map map = cm.get_map();
-			size_t orig_size = 1;
+			std::uint64_t orig_size = 1;
 			for (unsigned int k = 0; k < dummy_phrases; k++) {
 				auto id = map.wrap(j, i);
 				edge_t to_add(dst_gen(gen), len_gen(gen), id);
