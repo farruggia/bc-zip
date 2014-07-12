@@ -928,7 +928,7 @@ int main(int argc, char **argv)
 
 	for (unsigned int dst_idx = 0; dst_idx < phrase_times.dsts.size(); dst_idx++) {
 		for (unsigned int len_idx = 0; len_idx < phrase_times.lens.size(); len_idx++) {
-			std::cout 	<< "D = " 	<< phrase_times.dsts[dst_idx] << ", "
+			std::cerr 	<< "D = " 	<< phrase_times.dsts[dst_idx] << ", "
 						<< "L = " 	<< phrase_times.lens[len_idx] << ", "
 						<< "LAT = "	<< phrase_times.cm(dst_idx, len_idx) << std::endl;
 		}
