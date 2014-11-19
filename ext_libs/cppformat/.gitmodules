@@ -1,0 +1,9 @@
+[submodule "breathe"]
+	path = breathe
+	url = git://github.com/vitaut/breathe.git
+[submodule "doc/sphinx-bootstrap-theme"]
+	path = doc/sphinx-bootstrap-theme
+	url = https://github.com/cppformat/sphinx-bootstrap-theme.git
+[submodule "doc/sphinx_rtd_theme"]
+	path = doc/sphinx_rtd_theme
+	url = https://github.com/cppformat/sphinx_rtd_theme.git

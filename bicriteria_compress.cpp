@@ -27,6 +27,8 @@
 #include <solution_integrator.hpp>
 #include <path_swapper.hpp>
 
+#include <cppformat/format.h>
+
 #include <stdexcept>
 #include <iostream>
 #include <boost/program_options.hpp>
@@ -333,7 +335,8 @@ std::ostream& operator<< (std::ostream& stream, const solution_info &si)
 	auto space_kb = si.get_space() / (8 * kilo_num);
 	std::chrono::duration<double, std::nano> time_nano(si.get_time());
 	auto time_msecs = std::chrono::duration_cast<std::chrono::milliseconds>(time_nano).count();
-	stream << std::fixed << "S = " << space_kb << "KB, T = " << time_msecs << "msecs";// << ", ID = " << si.get_gen_info();
+	fmt::print(stream, "S = {0:.0f} ({1}KB), T = {2:.8f} ({3}ms)", si.get_space(), space_kb, si.get_time(), time_msecs);
+	// stream << std::fixed << "S = " << space_kb << "KB, T = " << time_msecs << "msecs";// << ", ID = " << si.get_gen_info();
 	return stream;
 }
 
@@ -551,6 +554,14 @@ public:
 		return std::get<1>(left).intersect(std::get<1>(right));
 	}
 
+	double lower_envelope(double lambda)
+	{
+		return std::min(
+			std::get<1>(left).value(lambda),
+			std::get<1>(right).value(lambda)
+		);
+	}
+
 	std::tuple<double, double> update(solution_info si)
 	{
 		solution_dual sd(si, cwf, W);
@@ -563,13 +574,21 @@ public:
 		return current();
 	}
 
-	std::tuple<solution_info, solution_info> get_basis()
+	std::tuple<solution_info, solution_info> get_basis() const
 	{
 		return std::make_tuple(std::get<0>(left), std::get<0>(right));
 	}
 
 
 };
+
+std::ostream &operator<<(std::ostream &stream, const dual_basis &basis)
+{
+	solution_info left, right;
+	std::tie(left, right) = basis.get_basis();
+	fmt::print(stream, "Left = {}\nRight = {}", left, right);
+	return stream;
+}
 
 namespace Color {
     enum Code {
@@ -841,22 +860,38 @@ public:
 
 		// Obtain cost-optimal solution
 		std::cout << "Getting cost-optimal solution" << std::endl;
-		auto t_1 = std::chrono::high_resolution_clock::now();
-		auto sol_info_cost = optimal(cmf.cost(), cmf.weight(), false);
-		auto t_2 = std::chrono::high_resolution_clock::now();
-		std::cout << "Elapsed time = " 
-		  << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
-		  << def << std::endl;
+		// auto t_1 = std::chrono::high_resolution_clock::now();
+		// auto sol_info_cost = optimal(cmf.cost(), cmf.weight(), false);
+		// auto t_2 = std::chrono::high_resolution_clock::now();
+
+		solution_info sol_info_cost, sol_info_weight;
+		std::chrono::seconds::rep measured_time;
+
+		std::tie(measured_time, sol_info_cost) = measure<std::chrono::seconds>::execution([&]{
+			return optimal(cmf.cost(), cmf.weight(), false);
+		});
+		fmt::print("Elapsed time = {}{}{} secs{}\n", bold, yellow, measured_time, def);
+		fmt::print("Cost-optimal = {}\n", sol_info_cost);
+
+		// std::cout << "Elapsed time = " 
+		//   << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
+		//   << def << std::endl;
 
 
 		std::cout << "Getting weight-optimal solution" << std::endl;
-		t_1 = std::chrono::high_resolution_clock::now();
-		auto sol_info_weight = optimal(cmf.weight(), cmf.cost(), true);
-		t_2 = std::chrono::high_resolution_clock::now();
-		std::cout << "Elapsed time = " 
-		  << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
-		  << def << std::endl;
+		// t_1 = std::chrono::high_resolution_clock::now();
+		// auto sol_info_weight = optimal(cmf.weight(), cmf.cost(), true);
+		// t_2 = std::chrono::high_resolution_clock::now();
 
+		std::tie(measured_time, sol_info_weight) = measure<std::chrono::seconds>::execution([&]{
+			return optimal(cmf.weight(), cmf.cost(), true);
+		});
+		fmt::print("Elapsed time = {}{}{} secs{}\n", bold, yellow, measured_time, def);
+		fmt::print("Weight-optimal = {}\n", sol_info_weight);
+
+		// std::cout << "Elapsed time = " 
+		//   << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
+		//   << def << std::endl;
 
 		double min_weight = cwf.get(sol_info_weight).weight;
 		double max_weight = cwf.get(sol_info_cost).weight;
@@ -864,8 +899,10 @@ public:
 		double W = fix_bound.get_bound();
 
 		std::cout.imbue(std::locale("en_US.UTF-8")); // Leaks!
-		std::cout.precision(2);
-		std::cout << "Setting W = " << std::fixed << bold << green << W << def << " ("  << fix_bound.name() << ")" << std::endl;
+		fmt::print("Setting W = {0}{1}{2:.2f}{3} ({4})\n", bold, green, W, def, fix_bound.name());
+
+		// std::cout.precision(2);
+		// std::cout << "Setting W = " << std::fixed << bold << green << W << def << " ("  << fix_bound.name() << ")" << std::endl;
 
 		// Early returns
 		if (W >= max_weight) {
@@ -881,50 +918,91 @@ public:
 
 		// Find the optimal, dual basis
 		const double eps = 1e-6;
-		double old_cost, old_lambda, cost, lambda;
-		std::tie(lambda, cost) = basis.current();
+		double phi_b, phi_bp, delta;
+		// std::tie(lambda, cost) = basis.current();
 
-		std::cout << "λ = " << lambda << ", φ = " << bold << green << cost << def << std::endl;
+		// std::cout << "λ = " << lambda << ", φ = " << bold << green << cost << def << std::endl;
 
 		do {
-			old_lambda = lambda;
-			old_cost = cost;
+			double lambda;
+			// (1) Find optimal (λ, φ)
+			std::tie(lambda, phi_b) = basis.current();
+
+			fmt::print("As evaluated by current = {}, as evaluated by le = {}\n", phi_b, basis.lower_envelope(lambda));
+
+			// (2) Solve for λ
+			solution_info si;
+			std::tie(measured_time, si) = measure<std::chrono::seconds>::execution([&]{
+				return optimal(cmf.lambda(lambda), cwf, W);
+			});
+
+			// (3) Update basis
+			basis.update(si);
+
+			// (4) Evaluate basis at current λ
+			phi_bp = basis.lower_envelope(lambda);
+			delta = std::abs(phi_b - phi_bp) / phi_bp;
+
+
+			fmt::print("λ = {0}, φ = {1}{2}{3:.12f}{4}, φ' = {5}{6}{7:.12f}{8}, Δ = {9:.9f}\n",lambda, bold, green, phi_b, def, bold, green, phi_b, def, delta);
+			std::cout << basis << std::endl;
+			fmt::print("Iteration time time = {}\n", measured_time, si);
+
+			// // (2) Solve Lagrangian for current λ
+			// t_1 = std::chrono::high_resolution_clock::now();
+			// auto si = optimal(cmf.lambda(old_lambda), cwf, W);
+			// t_2 = std::chrono::high_resolution_clock::now();
+
 			// Get current dual basis
-			t_1 = std::chrono::high_resolution_clock::now();
-			auto si = optimal(cmf.lambda(old_lambda), cwf, W);
-			t_2 = std::chrono::high_resolution_clock::now();
-			std::tie(lambda, cost) = basis.update(si);
+			// auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count();
+			// std::tie(lambda, cost) = basis.update(si);
 
-			std::cout << "Generated = " << si << std::endl;
-			std::cout << "λ = " << lambda << ", φ = " << bold << green << cost << def << std::endl;
-			std::cout << "Iteration time = " 
-					  << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
-					  << def << std::endl;
+			// fmt::print("Generated = {}\n", si);
+			// fmt::print("λ = {0}, φ = {1}{2}{3:.12f}{4}\n", lambda, bold, green, cost, def);
+			// fmt::print("Iteration time = {}{}{} secs{}\n", bold, yellow, elapsed_time, def);
+			// std::cout << "Generated = " << si << std::endl;
+			// std::cout << "λ = " << lambda << ", φ = " << bold << green << cost << def << std::endl;
+			// std::cout << "Iteration time = " 
+			// 		  << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
+			// 		  << def << std::endl;
 
-			assert(cost >= 0);
-		} while (std::abs(old_cost - cost) / old_cost > eps);
+			// assert(cost >= 0);
+		} while (delta > eps);
 
 		// Integrate the basis
 		std::cout << "Integrating base" << std::endl;
-		t_1 = std::chrono::high_resolution_clock::now();
 		solution_info left, right;
 		std::tie(left, right) = basis.get_basis();
-		auto base_parsings = writable_parsings(left, right);
-		t_2 = std::chrono::high_resolution_clock::now();
+		
+		// t_1 = std::chrono::high_resolution_clock::now();
+		// auto base_parsings = writable_parsings(left, right);
+		// t_2 = std::chrono::high_resolution_clock::now();
 
-		std::cout << "S_1 " << left << ", S_2 = " << right << std::endl;
-		std::cout << "Elapsed time = " 
-		  << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
-		  << def << std::endl;
+		std::vector<shared_parsing> base_parsings;		
+		std::tie(measured_time, base_parsings) = measure<std::chrono::seconds>::execution([&]{
+			return writable_parsings(left, right);
+		});
+
+		fmt::print("S_1 = {}, S_2 = {}\n", left, right);
+		fmt::print("Elapsed time = {}{}{} secs{}\n", bold, yellow, measured_time, def);
+
+		// std::cout << "S_1 " << left << ", S_2 = " << right << std::endl;
+		// std::cout << "Elapsed time = " 
+		//   << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
+		//   << def << std::endl;
 
 		// Path-swap
 		std::cout << "Swapping the base" << std::endl;
-		t_1 = std::chrono::high_resolution_clock::now();
+		auto t_1 = std::chrono::high_resolution_clock::now();
 		auto swapped_sol = path_swap(base_parsings[0], left, base_parsings[1], right, W, cwf, cmf);
-		t_2 = std::chrono::high_resolution_clock::now();
-		std::cout << "Elapsed time = " 
-		  << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
-		  << def << std::endl;
+		auto t_2 = std::chrono::high_resolution_clock::now();
+		measured_time = std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count();
+
+		fmt::print("Elapsed time = {}{}{} secs{}\n", bold, yellow, measured_time, def);
+
+		// std::cout << "Elapsed time = " 
+		//   << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
+		//   << def << std::endl;
 
 		if (correct_check) {
 			correctness_report report = check_correctness(swapped_sol, to_compress.text.get());

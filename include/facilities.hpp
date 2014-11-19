@@ -23,9 +23,31 @@
 #include <c_time.hpp>
 #include <time.h>
 
+#include <chrono>
+#include <tuple>
+
 
 // Expands to the pair of iterators of v.
 #define ITERS(v) v.begin(), v.end()
+
+/* Measure time */
+
+template<typename TimeT = std::chrono::milliseconds>
+struct measure
+{
+	typedef typename TimeT::rep timerep_t;
+
+    template<typename F>
+    static auto execution(F func) -> std::tuple<timerep_t, decltype(func())>
+    {
+        auto t_1 = std::chrono::high_resolution_clock::now();
+        auto v = func();
+        auto t_2 = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast< TimeT>(t_2 - t_1);
+
+        return std::make_tuple(duration.count(), std::move(v));
+    }
+};
 
 /** Return the number of bits of the minimal binary rep. of u */
 size_t bits(unsigned int u);

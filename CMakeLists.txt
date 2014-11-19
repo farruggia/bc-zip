@@ -4,6 +4,19 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # Compiler flags
 message(STATUS ${CMAKE_CXX_COMPILER_ID})
 
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-std=c++11 HAVE_STD_CPP11_FLAG)
+if (HAVE_STD_CPP11_FLAG)
+  set(CPP11_FLAG -std=c++11)
+else ()
+  check_cxx_compiler_flag(-std=c++0x HAVE_STD_CPP0X_FLAG)
+  if (HAVE_STD_CPP0X_FLAG)
+    set(CPP11_FLAG -std=c++0x)
+  endif ()
+endif ()
+
+set(CPP_DEF "${CPP11_FLAG}")
+
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE CLANG_VERSION)
 	if (CLANG_VERSION VERSION_LESS 3.2)
@@ -11,7 +24,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	endif()
 
 	message(STATUS "clang++ found")
-	set(CPP_DEF "-std=c++11")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
 	execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
@@ -20,7 +32,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	endif()
 
 	message(STATUS "g++ found")
-	set(CPP_DEF "-std=c++0x")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 	execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE ICC_VERSION)
 	message(STATUS "Detected ICC version: ${ICC_VERSION}")
@@ -29,22 +40,23 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 	endif()
 
 	message(STATUS "Intel found")
-	set(CPP_DEF "-std=c++11")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ansi-alias")
 else()
 	message(FATAL_ERROR "Compiler not recognized, exiting")
 	return()
 endif()
-set(CMAKE_CXX_FLAGS_FASTDEB "${CPP_DEF} ${CMAKE_CXX_FLAGS_DEBUG} -Wall -O3")
-set(CMAKE_CXX_FLAGS_DEBUG "${CPP_DEF} ${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "${CPP_DEF} ${CMAKE_CXX_FLAGS_RELEASE} -march=native")
-set(CMAKE_CXX_FLAGS_TEST "${CPP_DEF} ${CMAKE_CXX_FLAGS_RELEASE} -Wall -O3 -DNDEBUG -march=native")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CMAKE_VERBOSE_MAKEFILE ON)
 endif(NOT CMAKE_BUILD_TYPE)
+
+set(CMAKE_CXX_FLAGS_FASTDEB "${CPP_DEF} ${CMAKE_CXX_FLAGS_DEBUG} -Wall -O3 -fsanitize=address")
+set(CMAKE_CXX_FLAGS_DEBUG "${CPP_DEF} ${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -fsanitize=address")
+set(CMAKE_CXX_FLAGS_RELEASE "${CPP_DEF} ${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_CXX_FLAGS_RELEASESAN "${CPP_DEF} ${CMAKE_CXX_FLAGS_RELEASE} -g -fsanitize=address")
+set(CMAKE_CXX_FLAGS_TEST "${CPP_DEF} ${CMAKE_CXX_FLAGS_RELEASE} -Wall -fsanitize=address")
 
 # Include directory
 include_directories("${PROJECT_SOURCE_DIR}/include")
@@ -54,6 +66,9 @@ include_directories("${PROJECT_SOURCE_DIR}/ext_libs")
 set(DIVSUF_BUILD_DIR "difbuild")
 add_subdirectory("ext_libs/divsufsort" ${DIVSUF_BUILD_DIR})
 include_directories("${PROJECT_BINARY_DIR}/${DIVSUF_BUILD_DIR}/include/")
+
+# Format
+add_subdirectory("ext_libs/cppformat")
 
 # Boost
 find_package(Boost 1.46 COMPONENTS program_options REQUIRED)
@@ -72,7 +87,10 @@ endfunction()
 add_library(decompress decompress.cpp)
 
 add_executable(${PROJECT_NAME} bicriteria_compress.cpp  bit_compress.cpp list_gens.cpp  main.cpp)
-m_link(${PROJECT_NAME} decompress bcobjs ${Boost_LIBRARIES} divsufsort)
+m_link(${PROJECT_NAME} decompress bcobjs ${Boost_LIBRARIES} divsufsort format)
+
+add_executable(sa_getter sa_getter.cpp)
+target_link_libraries(sa_getter bcobjs divsufsort)
 
 # Include tests
 enable_testing()
