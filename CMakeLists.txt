@@ -81,13 +81,13 @@ add_library(bcobjs ${libraries})
 
 # Executable
 function(m_link)
-	target_link_libraries(${ARGN} -pthread) 
+	target_link_libraries(${ARGN} format -pthread) 
 endfunction()
 
 add_library(decompress decompress.cpp)
 
 add_executable(${PROJECT_NAME} bicriteria_compress.cpp  bit_compress.cpp list_gens.cpp  main.cpp)
-m_link(${PROJECT_NAME} decompress bcobjs ${Boost_LIBRARIES} divsufsort format)
+m_link(${PROJECT_NAME} decompress bcobjs ${Boost_LIBRARIES} divsufsort)
 
 add_executable(sa_getter sa_getter.cpp)
 target_link_libraries(sa_getter bcobjs divsufsort)

@@ -916,19 +916,16 @@ public:
 		// Initialize the basis
 		dual_basis basis = get_basis(cwf, sol_info_cost, sol_info_weight, W);
 
+		std::cout << basis << std::endl;
+
 		// Find the optimal, dual basis
 		const double eps = 1e-6;
 		double phi_b, phi_bp, delta;
-		// std::tie(lambda, cost) = basis.current();
-
-		// std::cout << "λ = " << lambda << ", φ = " << bold << green << cost << def << std::endl;
 
 		do {
 			double lambda;
 			// (1) Find optimal (λ, φ)
 			std::tie(lambda, phi_b) = basis.current();
-
-			fmt::print("As evaluated by current = {}, as evaluated by le = {}\n", phi_b, basis.lower_envelope(lambda));
 
 			// (2) Solve for λ
 			solution_info si;
@@ -944,52 +941,26 @@ public:
 			delta = std::abs(phi_b - phi_bp) / phi_bp;
 
 
-			fmt::print("λ = {0}, φ = {1}{2}{3:.12f}{4}, φ' = {5}{6}{7:.12f}{8}, Δ = {9:.9f}\n",lambda, bold, green, phi_b, def, bold, green, phi_b, def, delta);
+			fmt::print("λ = {0}, φ = {1}{2}{3:.12f}{4}, φ' = {5}{6}{7:.12f}{8}, Δ = {9:.9f}\n",lambda, bold, green, phi_b, def, bold, green, phi_bp, def, delta);
 			std::cout << basis << std::endl;
 			fmt::print("Iteration time time = {}\n", measured_time, si);
-
-			// // (2) Solve Lagrangian for current λ
-			// t_1 = std::chrono::high_resolution_clock::now();
-			// auto si = optimal(cmf.lambda(old_lambda), cwf, W);
-			// t_2 = std::chrono::high_resolution_clock::now();
-
-			// Get current dual basis
-			// auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count();
-			// std::tie(lambda, cost) = basis.update(si);
-
-			// fmt::print("Generated = {}\n", si);
-			// fmt::print("λ = {0}, φ = {1}{2}{3:.12f}{4}\n", lambda, bold, green, cost, def);
-			// fmt::print("Iteration time = {}{}{} secs{}\n", bold, yellow, elapsed_time, def);
-			// std::cout << "Generated = " << si << std::endl;
-			// std::cout << "λ = " << lambda << ", φ = " << bold << green << cost << def << std::endl;
-			// std::cout << "Iteration time = " 
-			// 		  << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
-			// 		  << def << std::endl;
-
-			// assert(cost >= 0);
 		} while (delta > eps);
 
 		// Integrate the basis
 		std::cout << "Integrating base" << std::endl;
 		solution_info left, right;
 		std::tie(left, right) = basis.get_basis();
-		
+
 		// t_1 = std::chrono::high_resolution_clock::now();
 		// auto base_parsings = writable_parsings(left, right);
 		// t_2 = std::chrono::high_resolution_clock::now();
 
-		std::vector<shared_parsing> base_parsings;		
+		std::vector<shared_parsing> base_parsings;
 		std::tie(measured_time, base_parsings) = measure<std::chrono::seconds>::execution([&]{
 			return writable_parsings(left, right);
 		});
 
-		fmt::print("S_1 = {}, S_2 = {}\n", left, right);
 		fmt::print("Elapsed time = {}{}{} secs{}\n", bold, yellow, measured_time, def);
-
-		// std::cout << "S_1 " << left << ", S_2 = " << right << std::endl;
-		// std::cout << "Elapsed time = " 
-		//   << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
-		//   << def << std::endl;
 
 		// Path-swap
 		std::cout << "Swapping the base" << std::endl;
@@ -999,10 +970,6 @@ public:
 		measured_time = std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count();
 
 		fmt::print("Elapsed time = {}{}{} secs{}\n", bold, yellow, measured_time, def);
-
-		// std::cout << "Elapsed time = " 
-		//   << bold << yellow << std::chrono::duration_cast<std::chrono::seconds>(t_2 - t_1).count() << " secs" 
-		//   << def << std::endl;
 
 		if (correct_check) {
 			correctness_report report = check_correctness(swapped_sol, to_compress.text.get());
@@ -1020,6 +987,17 @@ public:
 		}
 		if (time != nullptr) {
 			*time = parsing_length<double>(ITERS(swapped_sol), time_cm);
+		}
+		if (space != nullptr && time != nullptr) {
+			solution_info dsi(*space, *time, cost_model());
+			auto final_cost = cwf.get(dsi).cost;
+			fmt::print("Optimal Δ = {0:.9f} abs, {1:.9f} rel\n", final_cost - phi_bp, (final_cost - phi_bp) / phi_bp);
+			// Get maximum space cost
+			auto max_dst 	= space_cm.get_dst().back();
+			auto max_len 	= space_cm.get_len().back();
+			auto max_cost 	= space_cm.edge_cost(space_cm.get_edge(max_dst, max_len));
+			fmt::print("Ratio on theoretical maximum error = {0:.2f}\n", (final_cost - phi_bp) / max_cost);
+			fmt::print("Ratio on ε = {0:.2f}\n", (final_cost - phi_bp) / eps);
 		}
 
 		// Compress and return it

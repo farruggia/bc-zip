@@ -22,6 +22,8 @@
 #include <phrase_reader.hpp>
 #include <common.hpp>
 
+#include <cppformat/format.h>
+
 #include <array>
 #include <limits>
 #include <vector>
@@ -85,9 +87,32 @@ private:
 		unsigned int swap_sol, swap_point, best_cost;
 		swap_sol = swap_point = best_cost = std::numeric_limits<unsigned int>::max();
 		array<lzopt::phrase_reader<enc_t>, 2> readers = {{
-			lzopt::phrase_reader<enc_t>(parsings[0].begin, parsings[0].comp_len),
-			lzopt::phrase_reader<enc_t>(parsings[1].begin, parsings[1].comp_len)
+			lzopt::phrase_reader<enc_t>(parsings[0].begin, parsings[0].orig_len),
+			lzopt::phrase_reader<enc_t>(parsings[1].begin, parsings[1].orig_len)
 		}};
+
+		// // DEBUG: CHECK IF BASE_PARSINGS ARE DIFFERENT
+		// {
+		// 	auto p_1 = parsings[0], p_2 = parsings[1];
+
+		// 	auto enc_name = enc_t::name();
+
+		// 	auto r_1 = lzopt::get_phrase_reader(enc_name, p_1.begin, p_1.orig_len);
+		// 	auto r_2 = lzopt::get_phrase_reader(enc_name, p_2.begin, p_2.orig_len);
+
+		// 	unsigned int pos = 0U;
+		// 	while (!r_1->end() && !r_2->end()) {
+		// 		unsigned int d_1, d_2, ell_1, ell_2;
+		// 		r_1->next(d_1, ell_1);
+		// 		r_2->next(d_2, ell_2);
+		// 		if (d_1 != d_2 || ell_1 != ell_2) {
+		// 			fmt::print(std::cerr, "OK: pos = {}, len_1 = {}, len_2 = {}\n", pos, ell_1, ell_2);
+		// 			break;
+		// 		}
+		// 		pos += ell_1;
+		// 	}
+		// }
+		// // END DEBUG
 
 		array<edge_t, 2> incoming_edge = {{
 			edge_t(0), 
@@ -118,6 +143,7 @@ private:
 				
 				auto s_w = head_weights[s] + bridge_weight + tail_weights[s_other];
 				auto s_c = head_costs[s] + bridge_cost + tail_costs[s_other];
+
 				if (s_w <= W && s_c < best_cost) {
 					best_cost = s_c;
 					swap_point = heads[s];
@@ -144,6 +170,8 @@ private:
 				} while (heads[s] <= old_heads[s_other] && other_incoming_kind == REGULAR);
 			}
 		}
+		// Debug
+		// fmt::print(std::cerr, "Head 1 = {}, Head 2 = {}\n", heads[0], heads[1]);
 
 		if (swap_sol == std::numeric_limits<unsigned int>::max()) {
 			throw std::logic_error("No swap-point found. This is supposed to never happen...");
