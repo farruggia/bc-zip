@@ -781,10 +781,19 @@ private:
 	{
 		auto max_dst = space_cm.get_dst().back();
 		auto max_len = space_cm.get_len().back();
-		auto max_id = space_cm.get_id(max_dst, max_len);
-		edge_t heaviest_edge(max_dst, max_len, max_id);
-		auto max_space = space_cm.edge_cost(heaviest_edge);
-		auto max_time = time_cm.edge_cost(heaviest_edge);
+		// Heaviest copy edges
+		edge_t heaviest_edge_space = space_cm.get_edge(max_dst, max_len);
+		edge_t heaviest_edge_time = time_cm.get_edge(max_dst, max_len);
+		// Single literal edge
+		edge_t lit_edge(1);
+		auto max_space = std::max(
+			space_cm.edge_cost(heaviest_edge_space),
+			space_cm.edge_cost(lit_edge)
+		);
+		auto max_time = std::max(
+			time_cm.edge_cost(heaviest_edge_time),
+			time_cm.edge_cost(lit_edge)
+		);
 		auto max_cw = cwf.get(max_space, max_time);
 		return max_cw.get();
 	}
@@ -943,7 +952,7 @@ public:
 
 			fmt::print("λ = {0}, φ = {1}{2}{3:.12f}{4}, φ' = {5}{6}{7:.12f}{8}, Δ = {9:.9f}\n",lambda, bold, green, phi_b, def, bold, green, phi_bp, def, delta);
 			std::cout << basis << std::endl;
-			fmt::print("Iteration time time = {}\n", measured_time, si);
+			fmt::print("Iteration time = {}\n", measured_time, si);
 		} while (delta > eps);
 
 		// Integrate the basis
@@ -987,17 +996,6 @@ public:
 		}
 		if (time != nullptr) {
 			*time = parsing_length<double>(ITERS(swapped_sol), time_cm);
-		}
-		if (space != nullptr && time != nullptr) {
-			solution_info dsi(*space, *time, cost_model());
-			auto final_cost = cwf.get(dsi).cost;
-			fmt::print("Optimal Δ = {0:.9f} abs, {1:.9f} rel\n", final_cost - phi_bp, (final_cost - phi_bp) / phi_bp);
-			// Get maximum space cost
-			auto max_dst 	= space_cm.get_dst().back();
-			auto max_len 	= space_cm.get_len().back();
-			auto max_cost 	= space_cm.edge_cost(space_cm.get_edge(max_dst, max_len));
-			fmt::print("Ratio on theoretical maximum error = {0:.2f}\n", (final_cost - phi_bp) / max_cost);
-			fmt::print("Ratio on ε = {0:.2f}\n", (final_cost - phi_bp) / eps);
 		}
 
 		// Compress and return it
