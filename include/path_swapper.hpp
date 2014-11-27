@@ -82,10 +82,11 @@ private:
 	{
 		using std::array;
 		using std::tuple;
-		array<unsigned int, 2> head_costs {{0, 0}}, heads {{0, 0}}, to_process;
-		array<double, 2> head_weights {{0, 0}};
-		unsigned int swap_sol, swap_point, best_cost;
-		swap_sol = swap_point = best_cost = std::numeric_limits<unsigned int>::max();
+		array<unsigned int, 2> heads {{0, 0}}, to_process;
+		array<double, 2> head_weights {{0, 0}}, head_costs {{0, 0}};
+		unsigned int swap_sol, swap_point;
+		double best_cost = std::numeric_limits<double>::max();
+		swap_sol = swap_point = std::numeric_limits<unsigned int>::max();
 		array<lzopt::phrase_reader<enc_t>, 2> readers = {{
 			lzopt::phrase_reader<enc_t>(parsings[0].begin, parsings[0].orig_len),
 			lzopt::phrase_reader<enc_t>(parsings[1].begin, parsings[1].orig_len)
