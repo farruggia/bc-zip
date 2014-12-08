@@ -89,9 +89,6 @@ add_library(decompress decompress.cpp)
 add_executable(${PROJECT_NAME} bicriteria_compress.cpp  bit_compress.cpp list_gens.cpp  main.cpp)
 m_link(${PROJECT_NAME} decompress bcobjs ${Boost_LIBRARIES} divsufsort)
 
-add_executable(sa_getter sa_getter.cpp)
-target_link_libraries(sa_getter bcobjs divsufsort)
-
 # Include tests
 enable_testing()
 add_subdirectory(tests)
