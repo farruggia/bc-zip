@@ -23,19 +23,19 @@ template <typename inner_gen>
 class rm_protocol {
 	fsg_protocol<inner_gen> gen;
 	std::vector<edge_t> max_edge;
-	std::vector<edge_t> *inner_edges;
 	int next;
 public:
 	template <typename T>
 	rm_protocol(T &&gen, size_t t_len, const std::vector<unsigned int> &dst,
 				const std::vector<unsigned int> &len)
-		: gen(fsg_protocol<inner_gen>(std::forward<T>(gen), t_len, dst, len)), max_edge(1), inner_edges(&this->gen.get_edges()), next(1U)
+		: gen(fsg_protocol<inner_gen>(std::forward<T>(gen), t_len, dst, len)), max_edge(1), next(1U)
 	{
 
 	}
 
 	inline bool gen_next(std::uint32_t *generated)
 	{
+		auto &inner_edges = gen.get_edges();
 		std::uint32_t gen_now;
 		bool still_left = gen.gen_next(&gen_now);
 
@@ -52,7 +52,7 @@ public:
 		edge_t &candidate = max_edge.front();
 		candidate = edge_t(0U);
 		for (auto i = 0U; i < gen_now; i++) {
-			auto cur = (*inner_edges)[i];
+			auto cur = inner_edges[i];
 			if (cur.ell > candidate.ell) {
 				candidate = cur;
 			}
