@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Andrea Farruggia
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * 		http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,7 @@
 #include <limits>
 
 #include <cstdio>
-#include <stdlib.h>
+#include <cstdlib>
 
 typedef std::chrono::duration<double, std::nano> nanosecs_t;
 
@@ -130,9 +130,8 @@ unsigned int closest(unsigned int s, unsigned int e)
 	int mid = (s + e) / 2;
 	int next = closest_p2(mid);
 	std::vector<int> candidates = {next, next / 2, next / 4 * 3};
-	std::sort(candidates.begin(), candidates.end(),
-			  [mid](int v1, int v2) {
-		return std::abs<int>(v1 - mid) < std::abs<int>(v2 - mid);
+	std::sort(candidates.begin(), candidates.end(), [mid] (int v1, int v2) {
+		return std::abs(v1 - mid) < std::abs(v2 - mid);
 	});
 
 	return candidates.front();
@@ -166,10 +165,16 @@ std::vector<std::tuple<unsigned int, unsigned int, nanosecs_t> > interpolate(
 				std::get<0>(*next_win) = std::get<1>(*cur_win);
 				cur_win++;
 				next_win++;
-			} else if (std::abs<int>(lat.count() - std::get<2>(*cur_win).count()) > std::abs<int>(lat.count() - std::get<2>(*next_win).count())) {
-				std::get<1>(*cur_win) = std::get<0>(*next_win) = penultimate_dist;
-				cur_win++;
-				next_win++;
+			} else {
+				auto cur_dist = std::abs(
+					static_cast<int>(lat.count() - std::get<2>(*cur_win).count()));
+				auto next_dist = std::abs(
+					static_cast<int>(lat.count() - std::get<2>(*next_win).count()));
+				if (cur_dist > next_dist) {
+					std::get<1>(*cur_win) = std::get<0>(*next_win) = penultimate_dist;
+					cur_win++;
+					next_win++;
+				}
 			}
 		}
 		penultimate_dist = dist;
